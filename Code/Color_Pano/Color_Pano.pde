@@ -12,7 +12,7 @@ String[] portForUse = {"COM4", "COM3", "COM6"};
 
 color homeColor;
 int[] homeCenter = new int[2];
-int colorBalanceThreshold = 6;
+int colorBalanceThreshold = 20;
 
 void setup(){
   loadPixels();
@@ -45,7 +45,6 @@ void setup(){
     println("No 'Duino!");
     exit();
   }
-  boolean arduinoFound = false;
   for(String portToUse : portForUse){
     println("Trying to connect to " + portToUse);
     for(String port : ports){
@@ -72,9 +71,16 @@ void draw(){
 }
 
 void home(){
-  arduino.write("s100");
-  while(!compareColors(get(homeCenter[0], homeCenter[1]), homeColor, colorBalanceThreshold)){}
-  arduino.write("h");
+  if(debug){
+    arduino.write("s100");
+    while(!compareColors(get(homeCenter[0], homeCenter[1]), homeColor, colorBalanceThreshold)){
+      if(camera.available()){
+        camera.read();
+      }
+      image(camera, 0, 0);
+    }
+    arduino.write("h");
+  }
 }
 
 boolean compareColors(color colOne, color colTwo, int threshold){
@@ -86,5 +92,8 @@ boolean compareColors(color colOne, color colTwo, int threshold){
     }
   }
   println("Color 1: " + hex(colOne) + ", Color 2: " + hex(colTwo) + ", THE SAME");
+  arduino.write("h");
+  delay(500);
+  arduino.write("p0");
   return true;
 }
