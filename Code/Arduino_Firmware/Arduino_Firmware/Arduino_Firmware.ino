@@ -4,7 +4,7 @@
 /* Send a "s" followed by a value between -100 and 100 to turn motor by speed
  *  Send a "p" followed by a value between -399 and 399 to move to a position
  *  Send a "h" to set the current position to home
- *  Returns a "help\n" if it is stuck
+ *  Send a "g" to get the current Position, returned as an int + "\n"
  *  Returns a "done\n" when a p-move is complete
  */
 
@@ -57,6 +57,14 @@ void loop(){
       mSpeed = 0;
       doDrive();
       encoder0Pos = 0;
+      Serial.print("done\n");
+    }
+    else if(input[0] == '0'){
+      mSpeed = 0;
+      doDrive();
+    }
+    else if(input[0] = 'g'){
+      Serial.print(String(encoder0Pos) + "\n");
     }
   }
 }
@@ -77,7 +85,6 @@ void doEncoder() {
 }
 
 void doDrive(){
-  Serial.println("Driving: " + String(mSpeed));
   if(mSpeed > 0 && mSpeed <= 100){
     analogWrite(motorFwd, mSpeed);
     analogWrite(motorBkwd, 0);
