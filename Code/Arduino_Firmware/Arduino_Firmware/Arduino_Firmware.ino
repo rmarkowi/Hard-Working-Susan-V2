@@ -21,6 +21,7 @@ boolean isForward = false;
 volatile int encoder0Pos = 0;
 float lastTime;
 float lastPos;
+char input[6];
 
 void setup() { 
   pinMode(encoder0PinA, INPUT); 
@@ -40,7 +41,6 @@ void setup() {
 } 
 
 void loop(){
-  char input[6];
   if (Serial.available() > 0){
     (Serial.readString()).toCharArray(input, sizeof(input));
     if(input[0] == 's'){
@@ -107,10 +107,20 @@ void doMove(int pos){
     while(encoder0Pos - pos > 0){
       mSpeed = -100;
       doDrive();
+  if (Serial.available() > 0){
+        mSpeed = 0;
+        doDrive();
+        pos = encoder0Pos;
+      }
     }
     while(encoder0Pos - pos < 0){
       mSpeed = 100;
       doDrive();
+      if (Serial.available() > 0){
+        mSpeed = 0;
+        doDrive();
+        pos = encoder0Pos;
+      }
     }
   }
   mSpeed = 0;
