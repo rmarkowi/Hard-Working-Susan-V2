@@ -29,4 +29,7 @@ void keyPressed(){
   else if(key == ' '){
     makePano();
   }
+  else if(key == 'g'){
+    println("Pos: " + getPos());
+  }
 }

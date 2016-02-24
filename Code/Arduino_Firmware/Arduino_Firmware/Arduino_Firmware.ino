@@ -35,7 +35,7 @@ void setup() {
   analogWrite(motorBkwd, 0);
 
   attachInterrupt(0, doEncoder, CHANGE);  // encoder pin on interrupt 0 - pin 2
-  Serial.begin (9600);
+  Serial.begin (9600 );
   Serial.println("start");
   lastTime = millis();
 } 
@@ -130,7 +130,7 @@ void doMove(int pos){
     doMove(pos);
   }
   else{
-    Serial.println("done");
+    Serial.print("done\n");
   }
 }
 
