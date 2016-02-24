@@ -130,7 +130,7 @@ void doMove(int pos){
     doMove(pos);
   }
   else{
-    Serial.print("done\n");
+    Serial.println("done");
   }
 }
 

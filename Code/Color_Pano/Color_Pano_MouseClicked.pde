@@ -4,6 +4,7 @@ void mouseClicked(){
     homeCenter[0] = mouseX;
     homeCenter[1] = mouseY;
     println("mouseX: " + mouseX + ", mouseY: " + mouseY + ", color: " + hex(homeColor));
+    
   }
 }
 
@@ -22,7 +23,10 @@ void keyPressed(){
   else if(key == '0'){
     arduino.write("0");
   }
-  else if(key == ' '){
+  else if(key == 'z'){
     arduino.write("p0");
+  }
+  else if(key == ' '){
+    makePano();
   }
 }

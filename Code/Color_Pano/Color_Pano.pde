@@ -13,11 +13,17 @@ String[] portForUse = {"COM4", "COM3", "COM6"};
 color homeColor;
 int[] homeCenter = new int[2];
 int colorBalanceThreshold = 20;
+Table savedHomeVals;
+
+int maxPano = 400;
+int panoStep = 40;
 
 void setup(){
+  println("Starting");
   loadPixels();
   size(1920, 1080);
-  println("Starting");
+  
+  println("Looking for Cameras");
   String[] cams = Capture.list();
   if(cams.length == 0){
     println("No Cameras!");
@@ -39,6 +45,8 @@ void setup(){
       break;
     }
   }
+  
+  println("Looking for Arduino");
   boolean portFound = false;
   String[] ports = Serial.list();
   if(ports.length == 0){
@@ -59,6 +67,12 @@ void setup(){
       break;
     }
   }
+  arduino.clear();
+  println("Serial Pause");
+  delay(3000);
+  println("Wait for Handshake");
+  while(!waitForArduino("start")){}
+  arduino.write("0");
 }
 
 void draw(){
@@ -73,6 +87,7 @@ void draw(){
 void home(){
   if(debug){
     arduino.write("s100");
+    delay(2000);
     while(!compareColors(get(homeCenter[0], homeCenter[1]), homeColor, colorBalanceThreshold)){
       if(camera.available()){
         camera.read();
@@ -80,6 +95,10 @@ void home(){
       image(camera, 0, 0);
     }
     arduino.write("h");
+    delay(2000);
+    println("Drive to Home");
+    arduino.write("p-90");
+    while(!waitForArduino("done")){}
   }
 }
 
@@ -91,9 +110,34 @@ boolean compareColors(color colOne, color colTwo, int threshold){
       return false;
     }
   }
-  println("Color 1: " + hex(colOne) + ", Color 2: " + hex(colTwo) + ", THE SAME");
-  arduino.write("h");
-  delay(500);
-  arduino.write("p0");
   return true;
+}
+
+int panoPosition = 0;
+void makePano(){
+  String command = "p" + str(panoPosition);
+  println(command);
+  arduino.write(command);
+  delay(2000);
+  while(!waitForArduino("done")){}
+  println("Taking Photo");
+  if(panoPosition <maxPano){
+    panoPosition += panoStep;
+    makePano();
+  }
+  else{
+    println("Done Making Pano");
+  }
+}
+
+boolean waitForArduino(String toLookFor){
+  if(arduino.available() > 0){
+    String readString = arduino.readString();
+    println(readString);
+    if(readString.contains(toLookFor)){
+      arduino.clear();
+      return true;
+    }
+  }
+  return false;
 }
