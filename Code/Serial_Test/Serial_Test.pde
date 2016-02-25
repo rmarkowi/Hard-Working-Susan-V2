@@ -2,14 +2,17 @@ import processing.serial.*;
 Serial arduino;
 
 void setup(){
-  arduino = new Serial(this, "COM4", 9600);
+  arduino = new Serial(this, "COM6", 9600);
   //arduino.bufferUntil(10);
-  while(!waitForArduino("start")){}
-  arduino.write("p100");
-  while(!waitForArduino("done")){}
+  delay(2000);
 }
   
-  
+void draw(){
+  arduino.write("p0");
+  delay(10);
+  while(!waitForArduino("done"));
+  delay(1000);
+}
 boolean waitForArduino(String toLookFor){
   if(arduino.available() > 0){
     String readString = arduino.readString();

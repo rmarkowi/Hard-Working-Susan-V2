@@ -35,7 +35,7 @@ void setup() {
   analogWrite(motorBkwd, 0);
 
   attachInterrupt(0, doEncoder, CHANGE);  // encoder pin on interrupt 0 - pin 2
-  Serial.begin (9600 );
+  Serial.begin (9600);
   Serial.println("start");
   lastTime = millis();
 } 
@@ -57,14 +57,14 @@ void loop(){
       mSpeed = 0;
       doDrive();
       encoder0Pos = 0;
-      Serial.print("done\n");
+      Serial.println("done");
     }
     else if(input[0] == '0'){
       mSpeed = 0;
       doDrive();
     }
     else if(input[0] = 'g'){
-      Serial.print(String(encoder0Pos) + "\n");
+      Serial.println(String(encoder0Pos));
     }
   }
 }
@@ -85,19 +85,20 @@ void doEncoder() {
 }
 
 void doDrive(){
-  if(mSpeed > 0 && mSpeed <= 100){
+  mSpeed = map(mSpeed, -100, 100, -255, 255);
+  if(mSpeed > 0 && mSpeed <= 255){
     analogWrite(motorFwd, mSpeed);
     analogWrite(motorBkwd, 0);
     isForward = true;
   }
-  else if(mSpeed < 0 && mSpeed >= -100){
+  else if(mSpeed < 0 && mSpeed >= -255){
     analogWrite(motorFwd, 0);
     analogWrite(motorBkwd, abs(mSpeed));
     isForward = false;
   }
   else if(mSpeed == 0){
-    analogWrite(motorFwd, 100);
-    analogWrite(motorBkwd, 100);
+    analogWrite(motorFwd, 255);
+    analogWrite(motorBkwd, 255);
     isForward = false;
   }
 }
@@ -130,7 +131,7 @@ void doMove(int pos){
     doMove(pos);
   }
   else{
-    Serial.print("done\n");
+    Serial.println("done");
   }
 }
 

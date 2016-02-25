@@ -99,7 +99,9 @@ void home(){
     delay(2000);
     println("Drive to Home");
     arduino.write("p");
+    delay(1000);
     while(!waitForArduino("done")){}
+    delay(1000);
   }
 }
 
@@ -119,7 +121,9 @@ void makePano(){
   String command = "p" + str(panoPosition);
   println(command);
   arduino.write(command);
-  while(!waitForArduino("done")){}
+  delay(1000);
+  while(!waitForArduino("d")){}
+  delay(1000);
   println("Taking Photo");
   if(panoPosition <maxPano){
     panoPosition += panoStep;
@@ -135,6 +139,7 @@ boolean waitForArduino(String toLookFor){
     String readString = arduino.readString();
     println(readString);
     if(readString.contains(toLookFor)){
+      arduino.clear();
       return true;
     }
   }
