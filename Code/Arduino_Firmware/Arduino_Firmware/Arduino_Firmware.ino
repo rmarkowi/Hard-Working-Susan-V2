@@ -15,6 +15,7 @@ const int motorBkwd =  10;
 const int motorFwd = 9;
 
 int mSpeed = 0;
+int pos = 0;
 
 boolean isForward = false;
 
@@ -50,8 +51,7 @@ void loop(){
     }
     else if(input[0] == 'p'){
       String percent = String(input);
-      int pos = (percent.substring(1)).toInt();
-      doMove(pos);
+      pos = (percent.substring(1)).toInt();
     }
     else if(input[0] == 'h'){
       mSpeed = 0;
@@ -64,9 +64,16 @@ void loop(){
       doDrive();
     }
     else if(input[0] = 'g'){
+      if(encoder0Pos <= -400){
+        encoder0Pos = 0 - (encoder0Pos % 400);
+      }
+      else{
+        encoder0Pos %= 400;
+      }
       Serial.println(String(encoder0Pos));
     }
   }
+  doMove();
 }
 
 void doEncoder() {
@@ -76,12 +83,7 @@ void doEncoder() {
   else {
     encoder0Pos--;
   }
-  if(encoder0Pos >= 400){
-    encoder0Pos = 0;
-  }
-  else if(encoder0Pos <= -400){
-    encoder0Pos = 0;
-  }
+  Serial.println(encoder0Pos);
 }
 
 void doDrive(){
@@ -103,36 +105,33 @@ void doDrive(){
   }
 }
 
-void doMove(int pos){
-  if(encoder0Pos != pos){
-    while(encoder0Pos - pos > 0){
-      mSpeed = -100;
-      doDrive();
-  if (Serial.available() > 0){
-        mSpeed = 0;
-        doDrive();
-        pos = encoder0Pos;
-      }
-    }
-    while(encoder0Pos - pos < 0){
-      mSpeed = 100;
-      doDrive();
-      if (Serial.available() > 0){
-        mSpeed = 0;
-        doDrive();
-        pos = encoder0Pos;
-      }
-    }
-  }
-  mSpeed = 0;
-  doDrive();
-  delay(100);
-  if(encoder0Pos != pos){
-    doMove(pos);
+void doMove(){
+  if(pos < 0){
+    pos = 0 - (pos % 400);
   }
   else{
-    Serial.println("done");
+    pos %= 400;
   }
+  if(encoder0Pos < pos){
+    mSpeed = 100;
+  }
+  else if(encoder0Pos > pos){
+    mSpeed = -100;
+  }
+  else{
+    mSpeed = 0;
+    if(encoder0Pos <= -400){
+      encoder0Pos = 0 - (encoder0Pos % 400);
+    }
+    else{
+      encoder0Pos %= 400;
+    }
+  }
+  doDrive();
+  delay(100);
+  /*if(encoder0Pos != pos){
+    doMove(pos);
+  }*/
 }
 
 float getSpeed(){
