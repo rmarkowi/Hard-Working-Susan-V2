@@ -1,8 +1,6 @@
 import processing.serial.*;
 import processing.video.*;
 
-boolean debug = false;
-
 Capture camera;
 String[] camForUse = {"name=Logitech HD Webcam C615,size=1920x1080,fps=30", 
                       "name=Lenovo EasyCamera,size=1280x720,fps=30"};
@@ -10,13 +8,13 @@ String[] camForUse = {"name=Logitech HD Webcam C615,size=1920x1080,fps=30",
 Serial arduino;
 String[] portForUse = {"COM4", "COM3", "COM6"};
 
-color homeColor;
-int[] homeCenter = new int[2];
-int colorBalanceThreshold = 20;
-Table savedHomeVals;
+String posString = "";
+int currentArduinoPos = 0;
 
-int maxPano = 400;
-int panoStep = 40;
+int captureW = 20;
+int captureH = 1080;
+int panoLength = 60;
+int panoStep = 20;
 
 void setup(){
   println("Starting");
@@ -67,86 +65,53 @@ void setup(){
       break;
     }
   }
-  arduino.clear();
-  arduino.bufferUntil(10);
   println("Serial Pause");
-  delay(3000);
-  println("Wait for Handshake");
-  while(!waitForArduino("start")){}
-  arduino.write("0");
+  delay(1000);
+  arduino.clear();
 }
 
 void draw(){
-  if(debug){
-    if(camera.available()){
-      camera.read();
-    }
+  if(camera.available()){
     image(camera, 0, 0);
   }
+  //while(!makePano()){};
 }
 
-void home(){
-  if(debug){
-    arduino.write("s100");
-    delay(2000);
-    while(!compareColors(get(homeCenter[0], homeCenter[1]), homeColor, colorBalanceThreshold)){
-      if(camera.available()){
-        camera.read();
-      }
-      image(camera, 0, 0);
-    }
-    arduino.write("h");
-    delay(2000);
-    println("Drive to Home");
-    arduino.write("p");
-    delay(1000);
-    while(!waitForArduino("done")){}
-    delay(1000);
-  }
-}
-
-boolean compareColors(color colOne, color colTwo, int threshold){
-  float[] colors = {red(colOne), green(colOne), blue(colOne), red(colTwo), green(colTwo), blue(colTwo)};
-  for(int i = 0; i < (colors.length / 2); i++){
-    if((colors[i] < colors[i + 2] - threshold) || (colors[i] > colors[i + 2] + threshold)){
-      println("Color 1: " + hex(colOne) + ", Color 2: " + hex(colTwo) + ", not the same");
-      return false;
-    }
-  }
-  return true;
-}
-
-int panoPosition = 0;
-void makePano(){
-  String command = "p" + str(panoPosition);
-  println(command);
-  arduino.write(command);
-  delay(1000);
-  while(!waitForArduino("d")){}
-  delay(1000);
-  println("Taking Photo");
-  if(panoPosition <maxPano){
-    panoPosition += panoStep;
-    makePano();
-  }
-  else{
-    println("Done Making Pano");
-  }
-}
-
-boolean waitForArduino(String toLookFor){
+void getArduinoPos(){
   if(arduino.available() > 0){
-    String readString = arduino.readString();
-    println(readString);
-    if(readString.contains(toLookFor)){
-      arduino.clear();
-      return true;
+    int posByte = arduino.read();
+    if(posByte != 10 && posByte != 13){
+      posString += char(posByte);
+    }
+    else if(posByte == 13){
+      println(posString);
+      try{
+        currentArduinoPos = Integer.parseInt(posString);
+      }
+      catch(Exception e){}
+      finally{
+        posString = "";
+      }
     }
   }
-  return false;
 }
 
-String getPos(){
-  arduino.write('g');
-  return arduino.readString();
+boolean makePano(){/*
+  int panoPos = 0;
+  while(panoPos < panoLength){
+    arduino.write("p" + panoPos);
+    while(currentArduinoPos != panoPos){
+      getArduinoPos();
+    }
+    PImage tempImage;
+    tempImage = createImage(captureW, captureH, ARGB);
+    int sx = (camera.width / 2) - (captureW / 2);
+    if(camera.available()){
+      tempImage.copy(sx, 0, captureW, captureH, 0, 0, captureW, captureH);
+    }
+    String fileName = ("data/photo_" + panoPos + ".jpg");
+    tempImage.save(fileName);
+    panoPos += panoStep;
+  }*/
+  return true;
 }

@@ -17,6 +17,9 @@ const int motorFwd = 9;
 int mSpeed = 0;
 int pos = 0;
 
+int controller_I = 0;
+int last_err = 0;
+
 boolean isForward = false;
 
 volatile int encoder0Pos = 0;
@@ -112,21 +115,35 @@ void doMove(){
   else{
     pos %= 400;
   }
-  if(encoder0Pos < pos){
+  /*
+  if((encoder0Pos - pos < 0)){
     mSpeed = 100;
   }
-  else if(encoder0Pos > pos){
+  else if(encoder0Pos - pos > 0){
     mSpeed = -100;
   }
   else{
     mSpeed = 0;
     if(encoder0Pos <= -400){
-      encoder0Pos = 0 - (encoder0Pos % 400);
+      encoder0Pos = -1 * (encoder0Pos % 400);
     }
     else{
       encoder0Pos %= 400;
     }
-  }
+  }*/
+  int err = pos - encoder0Pos;
+  controller_I += err;
+  int D = err - last_err;
+  last_err = err;
+
+  const int P_GAIN = 1;
+  const int I_DIVISOR = 25;
+  const int D_GAIN = 25;
+
+  int tspeed = P_GAIN*err +  D_GAIN*D + (controller_I / I_DIVISOR);
+  // +
+  
+  mSpeed = min(100, max(-100, tspeed));
   doDrive();
   delay(100);
   /*if(encoder0Pos != pos){
