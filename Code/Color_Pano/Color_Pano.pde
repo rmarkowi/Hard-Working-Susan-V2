@@ -90,7 +90,6 @@ void getArduinoPos(){
       posString += char(posByte);
     }
     else if(posByte == 13){
-      println(posString);
       try{
         currentArduinoPos = Integer.parseInt(posString);
       }
@@ -125,5 +124,15 @@ boolean makePano(){
     tempImage.save(fileName);
     panoPos += panoStep;
   }
+  int textureW = (panoLength / panoStep) * captureW;
+  int textureH = 1080;
+  PImage texture = createImage(textureW, textureH, ARGB);
+  for(int panoNum = 0; panoNum < (panoLength / panoStep); panoNum += panoStep){
+    String imageToLoad = "data/photo_" + panoNum + ".jpg");
+    PImage tempImage = loadImage(imageToLoad);
+    int dx = panoNum * captureW;
+    texture.copy(tempImage, 0,0, captureW, captureH, dx, 0, captureW, captureH);
+  }
+  texture.save("data/texture.jpg");
   return true;
 }
