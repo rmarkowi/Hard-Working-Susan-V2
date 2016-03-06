@@ -66,15 +66,21 @@ void setup(){
     }
   }
   println("Serial Pause");
-  delay(1000);
+  delay(3000);
   arduino.clear();
 }
 
-void draw(){
-  if(camera.available()){
-    image(camera, 0, 0);
-  }
-  //while(!makePano()){};
+void draw(){/*
+  for(int i = 0; i < 10; i ++){
+    if(camera.available()){
+      camera.read();
+    }
+    PImage temp = createImage(1920, 1080, ARGB);
+    temp.copy(camera, 0, 0, 1920, 1080, 0, 0, 1920, 0);
+    temp.save("data/img_" + i + ".jpg");
+    delay(2000);
+  }*/
+  while(!makePano());
 }
 
 void getArduinoPos(){
@@ -96,22 +102,28 @@ void getArduinoPos(){
   }
 }
 
-boolean makePano(){/*
+boolean makePano(){
+  getArduinoPos();
   int panoPos = 0;
   while(panoPos < panoLength){
     arduino.write("p" + panoPos);
-    while(currentArduinoPos != panoPos){
+    while(currentArduinoPos < panoPos){
+      println(panoPos);
       getArduinoPos();
     }
+    PImage camImage;
     PImage tempImage;
+    camImage = createImage(camera.width, camera.height, ARGB);
     tempImage = createImage(captureW, captureH, ARGB);
     int sx = (camera.width / 2) - (captureW / 2);
     if(camera.available()){
-      tempImage.copy(sx, 0, captureW, captureH, 0, 0, captureW, captureH);
+      camera.read();
     }
+    camImage = camera.get();
+    tempImage.copy(camImage, sx, 0, captureW, captureH, 0, 0, captureW, captureH);
     String fileName = ("data/photo_" + panoPos + ".jpg");
     tempImage.save(fileName);
     panoPos += panoStep;
-  }*/
+  }
   return true;
 }
