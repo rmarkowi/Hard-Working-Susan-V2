@@ -13,7 +13,7 @@ int currentArduinoPos = 0;
 
 int captureW = 20;
 int captureH = 1080;
-int panoLength = 60;
+int panoLength = 400;
 int panoStep = 20;
 
 void setup(){
